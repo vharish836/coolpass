@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Password Hepler!</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <script type="module">
+      import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js";
+
+      createApp({
+        data() {
+          return {
+            schema: "",
+            domain: "",
+            username: "",
+            password: "",
+            parsedSchema: [],
+          };
+        },
+        watch: {
+          schema() {
+            this.parsedSchema = this.parseSchema();
+          },
+        },
+        methods: {
+          getPassword() {
+            let result = "";
+            for (let index = 0; index < this.parsedSchema.length; index++) {
+              const element = this.parsedSchema[index];
+              let ch = "";
+              switch (element.mode) {
+                case "domain":
+                  ch = this.domainChar(element.idx, element.cap);
+                  break;
+                case "user":
+                  ch = this.userChar(element.idx, element.cap);
+                  break;
+                case "domainLength":
+                  ch = this.domainLength();
+                  break;
+                case "userLength":
+                  ch = this.userLength();
+                  break;
+                default:
+                  ch = element.el;
+                  break;
+              }
+              console.log("i:", index, "el:", element, "ch:", ch);
+              result += ch;
+            }
+            this.password = result;
+          },
+          domainChar(idx, cap) {
+            let c = "";
+            if (idx < 0) {
+              c = this.domain.charAt(this.domain.length + idx);
+            } else {
+              c = this.domain.charAt(idx - 1);
+            }
+            if (cap) {
+              return c.toUpperCase();
+            }
+            return c;
+          },
+          userChar(idx, cap) {
+            let c = "";
+            if (idx < 0) {
+              c = this.username.charAt(this.user.length + idx);
+            } else {
+              c = this.username.charAt(idx - 1);
+            }
+            if (cap) {
+              return c.toUpperCase();
+            }
+            return c;
+          },
+          domainLength() {
+            return this.domain.length.toString();
+          },
+          userLength() {
+            return this.username.length.toString();
+          },
+          direct(el) {
+            return el;
+          },
+          parseSchema() {
+            let result = [];
+            let mode = "none"; // can be none,domain,user,esc
+            let index = "";
+            let cap = false;
+            for (let i = 0; i < this.schema.length; i++) {
+              const element = this.schema[i];
+              switch (element) {
+                case "@":
+                  if (mode == "domain") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "domain";
+                  } else if (mode == "user") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "domain";
+                  } else if (mode == "esc") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else {
+                    mode = "domain";
+                  }
+                  cap = false;
+                  index = "";
+                  break;
+                case "#":
+                  if (mode == "domain") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "user";
+                  } else if (mode == "user") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "user";
+                  } else if (mode == "esc") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else {
+                    mode = "user";
+                  }
+                  cap = false;
+                  index = "";
+                  break;
+                case "$":
+                  if (mode == "domain") {
+                    result.push({
+                      mode: "domainLength",
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else if (mode == "user") {
+                    result.push({
+                      mode: "userLength",
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else if (mode == "esc") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  }
+                  break;
+                case "\\":
+                  if (mode == "domain") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "esc";
+                  } else if (mode == "user") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "esc";
+                  } else if (mode == "esc") {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else {
+                    mode = "esc";
+                  }
+                  cap = false;
+                  index = "";
+                  break;
+                case "+":
+                  if (mode == "domain") {
+                    cap = true;
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else if (mode == "user") {
+                    cap = true;
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  } else {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  }
+                  cap = false;
+                  index = "";
+                  break;
+                case "0":
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                case "-":
+                  if (mode == "domain") {
+                    index += element;
+                  } else if (mode == "user") {
+                    index += element;
+                  } else {
+                    result.push({
+                      mode: mode,
+                      idx: parseInt(index),
+                      cap: cap,
+                      el: element,
+                    });
+                    mode = "none";
+                  }
+                  break;
+                default:
+                  result.push({
+                    mode: mode,
+                    idx: parseInt(index),
+                    cap: cap,
+                    el: element,
+                  });
+                  mode = "none";
+                  break;
+              }
+            }
+            if (mode == "domain") {
+              result.push({
+                mode: mode,
+                idx: parseInt(index),
+                cap: cap,
+                el: this.schema.charAt(this.schema.length - 1),
+              });
+              mode = "none";
+            } else if (mode == "user") {
+              result.push({
+                mode: mode,
+                idx: parseInt(index),
+                cap: cap,
+                el: this.schema.charAt(this.schema.length - 1),
+              });
+              mode = "none";
+            } else {
+              result.push({
+                mode: mode,
+                idx: parseInt(index),
+                cap: cap,
+                el: this.schema.charAt(this.schema.length - 1),
+              });
+              mode = "none";
+            }
+            return result;
+          },
+        },
+      }).mount("#app");
+    </script>
+  </head>
+
+  <body id="app">
+    <section class="section mt-6">
+      <div class="container mt-6">
+        <div class="box has-background-info-light">
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Schema</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" v-model="schema" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Service/Domain</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" v-model="domain" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">User Name</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" v-model="username" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Password</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input
+                    class="input is-static has-text-weight-semibold is-family-code is-size-4"
+                    type="text"
+                    v-model="password"
+                    readonly
+                  />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="block">{{parsedSchema}}</div> -->
+          <button class="button" @click="getPassword">Generate</button>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
