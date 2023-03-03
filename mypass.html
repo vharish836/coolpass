@@ -8,6 +8,14 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
     />
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
     <script type="module">
       import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js";
 
@@ -19,6 +27,7 @@
             username: "",
             password: "",
             parsedSchema: [],
+            copied: false,
           };
         },
         watch: {
@@ -26,7 +35,24 @@
             this.parsedSchema = this.parseSchema();
           },
         },
+        mounted() {
+          const params = new URLSearchParams(window.location.search);
+          if (params.has("schema")) {
+            this.schema = atob(params.get("schema"));
+          }
+        },
         methods: {
+          copyPassword() {
+            this.copied = false;
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(this.password).then(() => {
+                this.copied = true;
+                setTimeout(() => {
+                  this.copied = false;
+                }, 2000);
+              });
+            }
+          },
           getPassword() {
             let result = "";
             for (let index = 0; index < this.parsedSchema.length; index++) {
@@ -49,7 +75,6 @@
                   ch = element.el;
                   break;
               }
-              console.log("i:", index, "el:", element, "ch:", ch);
               result += ch;
             }
             this.password = result;
@@ -328,7 +353,10 @@
         <div class="box has-background-info-light">
           <div class="field is-horizontal">
             <div class="field-label is-normal">
-              <label class="label">Schema</label>
+              <label class="label">
+                <ion-icon name="key-outline"></ion-icon>
+                <span>&nbsp;Schema</span>
+              </label>
             </div>
             <div class="field-body">
               <div class="field">
@@ -341,12 +369,20 @@
 
           <div class="field is-horizontal">
             <div class="field-label is-normal">
-              <label class="label">Service/Domain</label>
+              <label class="label">
+                <ion-icon name="browsers-outline"></ion-icon>
+                <span>&nbsp;Domain</span>
+              </label>
             </div>
             <div class="field-body">
               <div class="field">
                 <p class="control">
-                  <input class="input" type="text" v-model="domain" />
+                  <input
+                    class="input"
+                    type="text"
+                    v-model="domain"
+                    placeholder="e.g. google"
+                  />
                 </p>
               </div>
             </div>
@@ -354,12 +390,20 @@
 
           <div class="field is-horizontal">
             <div class="field-label is-normal">
-              <label class="label">User Name</label>
+              <label class="label">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>&nbsp;User</span>
+              </label>
             </div>
             <div class="field-body">
               <div class="field">
                 <p class="control">
-                  <input class="input" type="text" v-model="username" />
+                  <input
+                    class="input"
+                    type="text"
+                    v-model="username"
+                    placeholder="e.g. email id"
+                  />
                 </p>
               </div>
             </div>
@@ -373,7 +417,7 @@
               <div class="field">
                 <p class="control">
                   <input
-                    class="input is-static has-text-weight-semibold is-family-code is-size-4"
+                    class="input is-static has-text-weight-semibold"
                     type="text"
                     v-model="password"
                     readonly
@@ -382,9 +426,20 @@
               </div>
             </div>
           </div>
-
-          <!-- <div class="block">{{parsedSchema}}</div> -->
-          <button class="button" @click="getPassword">Generate</button>
+          <p class="buttons">
+            <button class="button" @click="getPassword">
+              <ion-icon name="caret-forward-outline"></ion-icon>
+              <span>&nbsp;Generate</span>
+            </button>
+            <button v-if="copied" class="button is-success">
+              <ion-icon name="checkmark-outline"></ion-icon>
+              <span>&nbsp; Copied</span>
+            </button>
+            <button v-else class="button" @click="copyPassword">
+              <ion-icon name="copy-outline"></ion-icon>
+              <span>&nbsp; Copy</span>
+            </button>
+          </p>
         </div>
       </div>
     </section>
