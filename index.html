@@ -34,6 +34,12 @@
           schema() {
             this.parsedSchema = this.parseSchema();
           },
+          domain() {
+            this.domain = this.domain.replace(/\s/g, "");
+          },
+          username() {
+            this.username = this.username.replace(/\s/g, "");
+          },
         },
         mounted() {
           const params = new URLSearchParams(window.location.search);
