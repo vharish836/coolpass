@@ -337,14 +337,6 @@
                 el: this.schema.charAt(this.schema.length - 1),
               });
               mode = "none";
-            } else {
-              result.push({
-                mode: mode,
-                idx: parseInt(index),
-                cap: cap,
-                el: this.schema.charAt(this.schema.length - 1),
-              });
-              mode = "none";
             }
             return result;
           },
