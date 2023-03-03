@@ -1,8 +1,19 @@
-# coolpass
+# Password Helper
 
 Schema based password generator
 
-## schema
+- No backend
+- Nothing to remember
+
+Generate a secure password using your user name / ID which in most cases would be your email / phone & the service name
+
+#### What about schema? Where is this saved??
+
+Schema is prefilled using URL query param 'schema'. So you create the URL once and save it / bookmark it. That's it :-)
+
+Refer to example below for more details
+
+## Schema
 
 The schema defines how the password is derived from domain and user name fields
 
@@ -30,3 +41,7 @@ say the schema is `@1+@-1@$1234!#1+#2`
 
 so if domain is `test` and user name is `test`
 the password generated would be - `Tt41234!Te`
+
+this scehma can be pre-filled by appending a query param `schema=QDErQC0xQCQxMjM0ISMxKyMy`
+
+[Try it](https://vharish836.github.io/coolpass/?schema=QDErQC0xQCQxMjM0ISMxKyMy)
